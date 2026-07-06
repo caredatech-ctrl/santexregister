@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SANTEX NUR ENTERPRISES - CLOUD VIP SYSTEM V6</title>
-    <!-- SUPABASE CLIENT -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <title>SANTEX NUR ENTERPRISES - CLOUD VIP SYSTEM V7</title>
+    <!-- SUPABASE CLIENT (Non-blocking async load) -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" async></script>
     <style>
         /* ================= VIP GLASSMORPHISM UI ================= */
         :root {
@@ -24,7 +24,7 @@
         #bootOverlay {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background: #000; z-index: 10000; display: flex; flex-direction: column; 
-            justify-content: center; align-items: center; transition: opacity 0.8s ease-out;
+            justify-content: center; align-items: center; transition: opacity 0.5s ease-out;
         }
         .cyber-loader {
             width: 150px; height: 150px; border: 3px solid transparent; 
@@ -38,11 +38,9 @@
         }
         .boot-text { margin-top: 30px; font-family: monospace; font-size: 18px; color: var(--primary); text-shadow: 0 0 10px var(--primary); text-align: center; line-height: 1.5; font-weight: bold;}
         .progress-bar-container { width: 320px; height: 4px; background: #222; margin-top: 25px; overflow: hidden; border-radius: 2px; }
-        
-        /* Perfectly timed 9.5 second progress bar for a 10s boot */
-        .progress-bar { height: 100%; width: 0%; background: var(--primary); box-shadow: 0 0 12px var(--primary); animation: loadBar 9.5s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+        .progress-bar { height: 100%; width: 0%; background: var(--primary); box-shadow: 0 0 12px var(--primary); animation: loadBar 9.5s linear forwards; }
 
-        @keyframes loadBar { 0% { width: 0%; } 15% { width: 20%; } 45% { width: 55%; } 75% { width: 85%; } 100% { width: 100%; } }
+        @keyframes loadBar { 0% { width: 0%; } 100% { width: 100%; } }
         @keyframes spin { 100% { transform: rotate(360deg); } }
 
         /* ================= SUCCESS SAVE ANIMATION ================= */
@@ -64,10 +62,13 @@
         @keyframes popIn { 0% { transform: scale(0); } 70% { transform: scale(1.1); } 100% { transform: scale(1); } }
 
         /* ================= MAIN UI ================= */
-        .header { text-align: center; margin-bottom: 25px; }
+        .header { text-align: center; margin-bottom: 25px; position: relative; }
         .header h1 { font-size: 34px; letter-spacing: 2px; color: var(--primary); font-weight: 900; text-shadow: 0 0 20px rgba(0,230,255,0.5); margin-bottom: 5px; }
         .header p { color: #88c0d0; font-size: 14px; letter-spacing: 2px; text-transform: uppercase; font-weight: bold; }
         .supervisor-badge { background: rgba(0,230,255,0.1); border: 1px solid var(--primary); padding: 5px 12px; border-radius: 4px; color: var(--primary); font-size: 12px; display: inline-block; margin-top: 10px; letter-spacing: 1px; font-weight: bold; box-shadow: 0 0 10px rgba(0,230,255,0.2); }
+        
+        #networkStatus { position: absolute; top: 0; right: 0; font-size: 12px; font-weight: bold; padding: 5px 10px; border-radius: 4px; background: rgba(255, 184, 0, 0.2); border: 1px solid var(--warning); color: var(--warning); }
+        .status-live { background: rgba(0, 255, 136, 0.1) !important; border-color: var(--success) !important; color: var(--success) !important; }
 
         .nav-tabs { display: flex; gap: 10px; margin-bottom: 25px; justify-content: center; }
         .nav-btn {
@@ -133,7 +134,7 @@
     <!-- 10-SECOND VIP BOOT SEQUENCE -->
     <div id="bootOverlay">
         <div class="cyber-loader"></div>
-        <div class="boot-text" id="bootText">INITIATING CLOUD UPLINK...</div>
+        <div class="boot-text" id="bootText">INITIATING SECURE UPLINK...</div>
         <div class="progress-bar-container"><div class="progress-bar"></div></div>
     </div>
 
@@ -145,8 +146,9 @@
 
     <!-- MAIN INTERFACE -->
     <div class="header no-print">
+        <div id="networkStatus">⚫ LOCAL OFFLINE MODE</div>
         <h1>SANTEX NUR ENTERPRISES</h1>
-        <p>CLOUD ATTENDANCE VAULT V6 - LIVE DEPLOYMENT</p>
+        <p>CLOUD ATTENDANCE VAULT V7 - ZERO ERROR DEPLOYMENT</p>
         <div class="supervisor-badge">AUTHORIZED BY I.T. SUPERVISOR DILAWAR ALI</div>
     </div>
 
@@ -219,15 +221,55 @@
     <div id="print-section" style="display: none;"></div>
 
     <script>
+        // ================= CRITICAL: INSTANT 10-SECOND UNBLOCKER =================
+        // This runs instantly the moment the code is read. No waiting for window or network.
+        let isUIUnlocked = false;
+        let textInterval;
+        
+        function unlockUI() {
+            if (isUIUnlocked) return;
+            isUIUnlocked = true;
+            clearInterval(textInterval);
+            const overlay = document.getElementById('bootOverlay');
+            if (overlay) {
+                overlay.style.opacity = '0';
+                setTimeout(() => { 
+                    overlay.style.display = 'none'; 
+                    initUIDatesAndData(); 
+                }, 500);
+            }
+        }
+
+        // Hard lock removal at exactly 10 seconds.
+        setTimeout(unlockUI, 10000);
+
+        // Text Cycle Logic
+        const bootTexts = [
+            "INITIATING SECURE UPLINK...",
+            "AUTHENTICATING VIP CREDENTIALS...",
+            "ESTABLISHING HYBRID CONNECTION...",
+            "FETCHING LIVE DATA MATRIX...",
+            "VERIFYING INTEGRITY...",
+            "AUTO-SEEDING ARCHIVES...",
+            "SYSTEM READY. WELCOME DILAWAR ALI."
+        ];
+        let textIndex = 0;
+        textInterval = setInterval(() => {
+            textIndex++;
+            if(textIndex < bootTexts.length) {
+                document.getElementById('bootText').innerText = bootTexts[textIndex];
+            }
+        }, 1400);
+
+
         // ================= CONFIG & GLOBALS =================
         const SUPABASE_URL = 'https://xxfzgzubidfczvzfwiob.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh4ZnpnenViaWRmY3p2emZ3aW9iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzMzAzNzYsImV4cCI6MjA5ODkwNjM3Nn0.k73I4t76m6QQrVZbCxkj22nKUpFBdTWAFRaH7kLAGm8';
         
-        let supabase = null; // Defined dynamically to prevent crash if CDN is slow
-        let uiInitialized = false;
+        let supabaseClient = null; 
 
-        const LOCAL_EMP_DB = "SANTEX_EMP_DB_V6";
-        const LOCAL_ATT_DB = "SANTEX_ATT_DB_V6";
+        const LOCAL_EMP_DB = "SANTEX_EMP_DB_V7";
+        const LOCAL_ATT_DB = "SANTEX_ATT_DB_V7";
 
         let employees = [];
         let attendanceData = {}; 
@@ -240,70 +282,33 @@
             { id: 17, name: "MUBEEN" }, { id: 18, name: "ALI HASSAN" }
         ];
 
-        // ================= SAFE INIT & BOOT SEQUENCE =================
-        window.addEventListener('load', () => {
-            // 1. Text Animation Cycle (7 texts over 10 seconds = ~1400ms each)
-            const bootTexts = [
-                "INITIATING CLOUD UPLINK...",
-                "AUTHENTICATING VIP CREDENTIALS...",
-                "ESTABLISHING HYBRID CONNECTION...",
-                "FETCHING LIVE DATA MATRIX...",
-                "VERIFYING INTEGRITY...",
-                "AUTO-SEEDING ARCHIVES...",
-                "SYSTEM READY. WELCOME VIP."
-            ];
-            let textIndex = 0;
-            const textElement = document.getElementById('bootText');
-            
-            const textInterval = setInterval(() => {
-                textIndex++;
-                if(textIndex < bootTexts.length) textElement.innerText = bootTexts[textIndex];
-            }, 1400);
-
-            // 2. STRICT 10-SECOND UNBLOCKER (GUARANTEED UI REVEAL)
-            setTimeout(() => {
-                clearInterval(textInterval);
-                const overlay = document.getElementById('bootOverlay');
-                if (overlay) {
-                    overlay.style.opacity = '0';
-                    setTimeout(() => { 
-                        overlay.style.display = 'none'; 
-                        if (!uiInitialized) initUI(); // Ensure UI initializes even if fetch failed entirely
-                    }, 800);
-                }
-            }, 10000); 
-
-            // 3. Try Safe Cloud Connection
-            try {
-                if (window.supabase) {
-                    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-                    fetchCloudData(); // Attempt hybrid sync
-                } else {
-                    console.warn("Supabase SDK blocked by browser. Using Local Fallback.");
-                    fallbackToLocal();
-                }
-            } catch (err) {
-                console.error("Initialization Crash Prevented:", err);
-                fallbackToLocal();
+        // ================= BACKGROUND DATA FETCH =================
+        // This runs silently. If it fails, the UI still unlocks.
+        async function attemptCloudSync() {
+            // Check if CDN loaded the script
+            if (typeof supabase === 'undefined') {
+                console.warn("Supabase SDK missing. Using Local Memory.");
+                loadLocalMemory();
+                return;
             }
-        });
 
-        // ================= ZERO ERROR FETCH ENGINE =================
-        async function fetchCloudData() {
             try {
-                const { data: empData, error: empErr } = await supabase.from('santex_employees').select('*').order('id');
+                supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
                 
+                // Fetch Employees
+                const { data: empData, error: empErr } = await supabaseClient.from('santex_employees').select('*').order('id');
                 if (empData && empData.length > 0) {
                     employees = empData;
                     localStorage.setItem(LOCAL_EMP_DB, JSON.stringify(employees)); 
                 } else {
+                    // Auto-seed cloud if empty
                     employees = [...defaultEmployees];
-                    await supabase.from('santex_employees').upsert(defaultEmployees); 
+                    await supabaseClient.from('santex_employees').upsert(defaultEmployees);
                     localStorage.setItem(LOCAL_EMP_DB, JSON.stringify(employees));
                 }
 
-                const { data: attData, error: attErr } = await supabase.from('santex_attendance').select('*');
-                
+                // Fetch Attendance
+                const { data: attData, error: attErr } = await supabaseClient.from('santex_attendance').select('*');
                 if (attData && attData.length > 0) {
                     attendanceData = {};
                     attData.forEach(row => {
@@ -312,29 +317,40 @@
                     });
                     localStorage.setItem(LOCAL_ATT_DB, JSON.stringify(attendanceData));
                 } else {
-                    fallbackLocalAttendance();
+                    const localAtt = localStorage.getItem(LOCAL_ATT_DB);
+                    if(localAtt) attendanceData = JSON.parse(localAtt);
                 }
+
+                // Indicate Success
+                const statusBadge = document.getElementById('networkStatus');
+                statusBadge.innerText = "🟢 CLOUD UPLINK ACTIVE";
+                statusBadge.classList.add('status-live');
+
             } catch (err) {
-                console.error("Cloud Offline. Booting Local DB.");
-                fallbackToLocal();
+                console.error("Cloud Error. Running on Local Memory.");
+                loadLocalMemory();
+            }
+
+            // Refresh UI if it was already unlocked while fetching
+            if (isUIUnlocked) {
+                renderEmpList();
+                loadDailyAttendance();
+                generateReport();
             }
         }
 
-        function fallbackToLocal() {
+        function loadLocalMemory() {
             const localEmp = localStorage.getItem(LOCAL_EMP_DB);
             employees = localEmp ? JSON.parse(localEmp) : [...defaultEmployees];
-            fallbackLocalAttendance();
-        }
-
-        function fallbackLocalAttendance() {
             const localAtt = localStorage.getItem(LOCAL_ATT_DB);
             if(localAtt) attendanceData = JSON.parse(localAtt);
         }
 
-        function initUI() {
-            if (uiInitialized) return; // Prevent double firing
-            uiInitialized = true;
+        // Start background sync immediately
+        attemptCloudSync();
 
+        // ================= UI INITIALIZATION =================
+        function initUIDatesAndData() {
             const today = new Date();
             const yyyy = today.getFullYear();
             const mm = String(today.getMonth() + 1).padStart(2, '0');
@@ -342,6 +358,8 @@
             
             document.getElementById('entryDate').value = `${yyyy}-${mm}-${dd}`;
             document.getElementById('reportMonth').value = `${yyyy}-${mm}`;
+
+            if(employees.length === 0) loadLocalMemory(); // Guarantee data
 
             renderEmpList();
             loadDailyAttendance();
@@ -421,13 +439,13 @@
                 payload.push({ date: dateStr, emp_id: empId, primary_status: primaryVal, ot: isOT });
             });
 
-            // Local Fallback Save
+            // 1. Local Fallback Save
             localStorage.setItem(LOCAL_ATT_DB, JSON.stringify(attendanceData));
 
-            // Cloud Save Attempt
-            if (supabase) {
+            // 2. Cloud Save Attempt
+            if (supabaseClient) {
                 try {
-                    const { error } = await supabase.from('santex_attendance').upsert(payload, { onConflict: 'date,emp_id' });
+                    const { error } = await supabaseClient.from('santex_attendance').upsert(payload, { onConflict: 'date,emp_id' });
                     if (error) throw error;
                     document.getElementById('saveMessage').innerText = "CLOUD SYNC COMPLETE";
                     document.getElementById('saveMessage').style.color = "var(--success)";
@@ -536,7 +554,7 @@
             renderEmpList(); loadDailyAttendance(); generateReport();
             nameInput.value = "";
 
-            if (supabase) await supabase.from('santex_employees').insert([{ id: newId, name: name }]);
+            if (supabaseClient) await supabaseClient.from('santex_employees').insert([{ id: newId, name: name }]);
         }
 
         async function editEmp(id) {
@@ -547,7 +565,7 @@
                 localStorage.setItem(LOCAL_EMP_DB, JSON.stringify(employees));
                 renderEmpList(); loadDailyAttendance(); generateReport();
                 
-                if (supabase) await supabase.from('santex_employees').update({ name: emp.name }).eq('id', id);
+                if (supabaseClient) await supabaseClient.from('santex_employees').update({ name: emp.name }).eq('id', id);
             }
         }
 
@@ -557,7 +575,7 @@
                 localStorage.setItem(LOCAL_EMP_DB, JSON.stringify(employees));
                 renderEmpList(); loadDailyAttendance(); generateReport();
                 
-                if (supabase) await supabase.from('santex_employees').delete().eq('id', id);
+                if (supabaseClient) await supabaseClient.from('santex_employees').delete().eq('id', id);
             }
         }
     </script>
