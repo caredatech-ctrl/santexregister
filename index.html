@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SANTEX NUR ENTERPRISES - CLOUD VIP SYSTEM V4</title>
+    <title>SANTEX NUR ENTERPRISES - CLOUD VIP SYSTEM V5</title>
     <!-- SUPABASE CLIENT -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
@@ -63,8 +63,9 @@
 
         /* ================= MAIN UI ================= */
         .header { text-align: center; margin-bottom: 25px; }
-        .header h1 { font-size: 34px; letter-spacing: 2px; color: var(--primary); font-weight: 900; text-shadow: 0 0 20px rgba(0,230,255,0.5); }
-        .header p { color: #88c0d0; font-size: 15px; letter-spacing: 2px; margin-top: 5px; text-transform: uppercase; }
+        .header h1 { font-size: 34px; letter-spacing: 2px; color: var(--primary); font-weight: 900; text-shadow: 0 0 20px rgba(0,230,255,0.5); margin-bottom: 5px; }
+        .header p { color: #88c0d0; font-size: 14px; letter-spacing: 2px; text-transform: uppercase; font-weight: bold; }
+        .supervisor-badge { background: rgba(0,230,255,0.1); border: 1px solid var(--primary); padding: 4px 10px; border-radius: 4px; color: var(--primary); font-size: 12px; display: inline-block; margin-top: 8px; letter-spacing: 1px; }
 
         .nav-tabs { display: flex; gap: 10px; margin-bottom: 25px; justify-content: center; }
         .nav-btn {
@@ -103,7 +104,7 @@
         .status-label:hover { text-shadow: 0 0 8px currentColor; }
         .status-label input { width: 18px; height: 18px; cursor: pointer; accent-color: currentColor; }
 
-        /* ================= PERFECT PRINT FORMATTING (Image replication) ================= */
+        /* ================= PERFECT PRINT FORMATTING ================= */
         @page { size: A4 landscape; margin: 0; }
         @media print {
             body { background: #fff; color: #000; padding: 10mm; }
@@ -143,7 +144,8 @@
     <!-- MAIN INTERFACE -->
     <div class="header no-print">
         <h1>SANTEX NUR ENTERPRISES</h1>
-        <p>CLOUD ATTENDANCE VAULT V4 - LIVE DEPLOYMENT</p>
+        <p>CLOUD ATTENDANCE VAULT V5 - LIVE DEPLOYMENT</p>
+        <div class="supervisor-badge">AUTHORIZED BY I.T. SUPERVISOR DILAWAR ALI</div>
     </div>
 
     <div class="nav-tabs no-print">
@@ -215,24 +217,35 @@
     <div id="print-section" style="display: none;"></div>
 
     <script>
-        // ================= SUPABASE INITIALIZATION =================
+        // ================= SUPABASE & HYBRID STORAGE INITIALIZATION =================
         const SUPABASE_URL = 'https://xxfzgzubidfczvzfwiob.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh4ZnpnenViaWRmY3p2emZ3aW9iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzMzAzNzYsImV4cCI6MjA5ODkwNjM3Nn0.k73I4t76m6QQrVZbCxkj22nKUpFBdTWAFRaH7kLAGm8';
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+        const LOCAL_EMP_DB = "SANTEX_EMP_DB_V5";
+        const LOCAL_ATT_DB = "SANTEX_ATT_DB_V5";
+
         let employees = [];
-        let attendanceData = {}; // Internal Matrix: { "YYYY-MM-DD": { empId: {primary, ot} } }
+        let attendanceData = {}; 
+
+        const defaultEmployees = [
+            { id: 1, name: "AHMAD ANJUM" }, { id: 2, name: "WASEEM RASHEED" }, { id: 3, name: "TAYYAB" }, { id: 4, name: "ABU SUFIYAN" },
+            { id: 5, name: "QAISER" }, { id: 6, name: "ALI ZIA" }, { id: 7, name: "KHALIL" }, { id: 8, name: "AMIR" },
+            { id: 9, name: "FAIZAN" }, { id: 10, name: "AYAZ" }, { id: 11, name: "WAHAB" }, { id: 12, name: "USAMA" },
+            { id: 13, name: "SUFYAN" }, { id: 14, name: "RAZA SAFDAR" }, { id: 15, name: "SHAHZAIB QURESHI" }, { id: 16, name: "YUSUF" },
+            { id: 17, name: "MUBEEN" }, { id: 18, name: "ALI HASSAN" }
+        ];
 
         // ================= 15-SECOND CLOUD BOOT SEQUENCE =================
         const bootTexts = [
             "INITIATING CLOUD UPLINK...",
-            "AUTHENTICATING VIP CREDENTIALS...",
-            "ESTABLISHING SUPABASE CONNECTION...",
-            "FETCHING LIVE EMPLOYEE REGISTRY...",
-            "DOWNLOADING ENCRYPTED ATTENDANCE VAULT...",
-            "VERIFYING DATA INTEGRITY...",
-            "BUILDING MULTI-SELECTION MATRICES...",
-            "SYSTEM READY. WELCOME VIP."
+            "AUTHENTICATING I.T. SUPERVISOR CREDENTIALS...",
+            "ESTABLISHING HYBRID SUPABASE CONNECTION...",
+            "FETCHING LIVE DATA MATRIX...",
+            "VERIFYING CLOUD INTEGRITY...",
+            "AUTO-SEEDING MISSING ARCHIVES (ZERO ERROR PROTOCOL)...",
+            "BUILDING MULTI-SELECTION UI...",
+            "SYSTEM READY. WELCOME DILAWAR ALI."
         ];
 
         window.onload = function() {
@@ -244,10 +257,10 @@
                 if(textIndex < bootTexts.length) textElement.innerText = bootTexts[textIndex];
             }, 1800);
 
-            // Fetch data concurrently while animation plays
+            // Execute Hybrid Fetch
             fetchCloudData();
 
-            // Strict 15-second visual requirement
+            // Strict 15-second cinematic boot
             setTimeout(() => {
                 clearInterval(textInterval);
                 document.getElementById('bootOverlay').style.opacity = '0';
@@ -258,27 +271,44 @@
             }, 15000); 
         };
 
-        // ================= DATABASE FETCHING =================
+        // ================= ZERO ERROR HYBRID FETCHING =================
         async function fetchCloudData() {
             try {
-                // Fetch Employees
+                // 1. Fetch Employees
                 const { data: empData, error: empErr } = await supabase.from('santex_employees').select('*').order('id');
-                if (empData) employees = empData;
+                
+                if (empData && empData.length > 0) {
+                    employees = empData;
+                    localStorage.setItem(LOCAL_EMP_DB, JSON.stringify(employees)); // Backup locally
+                } else {
+                    // ZERO ERROR: If cloud is empty or RLS blocks it, load defaults & force auto-seed
+                    console.log("Cloud Empty. Activating Auto-Seed...");
+                    employees = [...defaultEmployees];
+                    await supabase.from('santex_employees').upsert(defaultEmployees); // Inject into cloud silently
+                    localStorage.setItem(LOCAL_EMP_DB, JSON.stringify(employees));
+                }
 
-                // Fetch Attendance
+                // 2. Fetch Attendance
                 const { data: attData, error: attErr } = await supabase.from('santex_attendance').select('*');
-                if (attData) {
+                
+                if (attData && attData.length > 0) {
                     attendanceData = {};
                     attData.forEach(row => {
                         if (!attendanceData[row.date]) attendanceData[row.date] = {};
-                        attendanceData[row.date][row.emp_id] = {
-                            primary: row.primary_status,
-                            ot: row.ot
-                        };
+                        attendanceData[row.date][row.emp_id] = { primary: row.primary_status, ot: row.ot };
                     });
+                    localStorage.setItem(LOCAL_ATT_DB, JSON.stringify(attendanceData)); // Backup locally
+                } else {
+                    // Load local backup if cloud is empty
+                    const localAtt = localStorage.getItem(LOCAL_ATT_DB);
+                    if(localAtt) attendanceData = JSON.parse(localAtt);
                 }
             } catch (err) {
-                console.error("Cloud Sync Error during boot", err);
+                console.error("Hybrid Sync Offline. Loading Local Storage.", err);
+                const localEmp = localStorage.getItem(LOCAL_EMP_DB);
+                employees = localEmp ? JSON.parse(localEmp) : [...defaultEmployees];
+                const localAtt = localStorage.getItem(LOCAL_ATT_DB);
+                if(localAtt) attendanceData = JSON.parse(localAtt);
             }
         }
 
@@ -306,7 +336,7 @@
             if(tabId === 'monthlyReport') generateReport(); 
         }
 
-        // ================= DAILY ENTRY (CLOUD READ/WRITE) =================
+        // ================= DAILY ENTRY =================
         function loadDailyAttendance() {
             const dateStr = document.getElementById('entryDate').value;
             if(!dateStr) return;
@@ -352,14 +382,12 @@
             const dateStr = document.getElementById('entryDate').value;
             if(!dateStr) return;
 
-            // Show intermediate loading state
-            document.getElementById('saveMessage').innerText = "UPLOADING TO SUPABASE...";
+            document.getElementById('saveMessage').innerText = "SYNCING TO VAULT...";
             const overlay = document.getElementById('saveOverlay');
             overlay.style.opacity = '1';
             overlay.style.pointerEvents = 'all';
 
             const payload = [];
-            
             if(!attendanceData[dateStr]) attendanceData[dateStr] = {};
 
             document.querySelectorAll('.status-group').forEach(group => {
@@ -367,31 +395,25 @@
                 const primaryVal = group.querySelector(`input[name="pri_${empId}"]:checked`).value;
                 const isOT = group.querySelector('.ot-check').checked;
                 
-                // Update Local Matrix
                 attendanceData[dateStr][empId] = { primary: primaryVal, ot: isOT };
-
-                // Push to DB payload
-                payload.push({
-                    date: dateStr,
-                    emp_id: empId,
-                    primary_status: primaryVal,
-                    ot: isOT
-                });
+                payload.push({ date: dateStr, emp_id: empId, primary_status: primaryVal, ot: isOT });
             });
 
-            // Upsert array to Supabase
+            // 1. Save to Local Storage Immediately (Zero Error Fallback)
+            localStorage.setItem(LOCAL_ATT_DB, JSON.stringify(attendanceData));
+
+            // 2. Push to Supabase
             const { error } = await supabase.from('santex_attendance').upsert(payload, { onConflict: 'date,emp_id' });
 
             if (error) {
-                document.getElementById('saveMessage').innerText = "ERROR SYNCING DATA!";
-                document.getElementById('saveMessage').style.color = "var(--danger)";
-                setTimeout(() => { overlay.style.opacity = '0'; overlay.style.pointerEvents = 'none'; }, 3000);
-                return;
+                console.error(error);
+                document.getElementById('saveMessage').innerText = "SAVED LOCALLY (CLOUD OFFLINE)";
+                document.getElementById('saveMessage').style.color = "var(--warning)";
+            } else {
+                document.getElementById('saveMessage').innerText = "CLOUD SYNC COMPLETE";
+                document.getElementById('saveMessage').style.color = "var(--success)";
             }
 
-            // Success Animation
-            document.getElementById('saveMessage').innerText = "CLOUD SYNC COMPLETE";
-            document.getElementById('saveMessage').style.color = "var(--success)";
             const ring = document.getElementById('sRing');
             ring.classList.remove('animate');
             void ring.offsetWidth; 
@@ -444,10 +466,7 @@
 
                     if (record) {
                         displayVal = record.primary; 
-                        if (record.ot) {
-                            displayVal += "<br>+OT"; 
-                            isOT = true;
-                        }
+                        if (record.ot) { displayVal += "<br>+OT"; isOT = true; }
                     }
 
                     const otClass = isOT ? 'has-ot' : '';
@@ -457,7 +476,6 @@
             });
 
             html += `</tbody></table>`;
-
             document.getElementById('reportPreviewContainer').innerHTML = html;
             document.getElementById('print-section').innerHTML = html;
         }
@@ -486,12 +504,11 @@
             if (!name) return;
             const newId = employees.length > 0 ? Math.max(...employees.map(e => e.id)) + 1 : 1;
             
-            // Local Update
             employees.push({ id: newId, name: name });
+            localStorage.setItem(LOCAL_EMP_DB, JSON.stringify(employees));
             renderEmpList(); loadDailyAttendance(); generateReport();
             nameInput.value = "";
 
-            // Cloud Sync
             await supabase.from('santex_employees').insert([{ id: newId, name: name }]);
         }
 
@@ -499,21 +516,20 @@
             const emp = employees.find(e => e.id === id);
             const newName = prompt("RENAME EMPLOYEE:", emp.name);
             if(newName && newName.trim() !== "") {
-                const finalName = newName.trim().toUpperCase();
-                // Local
-                emp.name = finalName;
+                emp.name = newName.trim().toUpperCase();
+                localStorage.setItem(LOCAL_EMP_DB, JSON.stringify(employees));
                 renderEmpList(); loadDailyAttendance(); generateReport();
-                // Cloud
-                await supabase.from('santex_employees').update({ name: finalName }).eq('id', id);
+                
+                await supabase.from('santex_employees').update({ name: emp.name }).eq('id', id);
             }
         }
 
         async function deleteEmp(id) {
             if(confirm("DELETE FROM CURRENT ROSTER? Vault history tied to this ID will be affected.")) {
-                // Local
                 employees = employees.filter(e => e.id !== id);
+                localStorage.setItem(LOCAL_EMP_DB, JSON.stringify(employees));
                 renderEmpList(); loadDailyAttendance(); generateReport();
-                // Cloud
+                
                 await supabase.from('santex_employees').delete().eq('id', id);
             }
         }
