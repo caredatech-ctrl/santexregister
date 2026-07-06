@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SANTEX NUR ENTERPRISES - VIP ENCRYPTED SYSTEM V8</title>
-    <!-- SUPABASE CLIENT (Non-blocking async load) -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" async></script>
+    <title>SANTEX NUR ENTERPRISES - VIP ENCRYPTED SYSTEM V9</title>
+    <!-- SUPABASE CLIENT (Synchronous load to guarantee connection) -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         /* ================= VIP GLASSMORPHISM UI ================= */
         :root {
@@ -152,7 +152,7 @@
     <div class="header no-print">
         <div id="networkStatus">🔒 OFFLINE (256-BIT ENCRYPTED)</div>
         <h1>SANTEX NUR ENTERPRISES</h1>
-        <p>CLOUD ATTENDANCE VAULT V8 - ENCRYPTION LIVE</p>
+        <p>CLOUD ATTENDANCE VAULT V9 - LIVE DEPLOYMENT</p>
         <div class="badges-container">
             <div class="crypto-badge">AES-256 LOCAL VAULT ACTIVE</div>
             <div class="supervisor-badge">AUTHORIZED BY I.T. SUPERVISOR DILAWAR ALI</div>
@@ -197,7 +197,6 @@
             <button class="action-btn" onclick="window.print()" style="background: transparent; border: 2px solid var(--primary); color: var(--primary);">PRINT HD FORMAT</button>
         </div>
         
-        <!-- ZERO ERROR: Fallback default white background guarantees visibility -->
         <div style="overflow-x: auto; background: #fff; padding: 10px; border-radius: 5px; min-height: 200px;" id="reportPreviewContainer">
             <!-- Preview renders here -->
         </div>
@@ -232,16 +231,13 @@
         // ================= 256-BIT ENCRYPTION PROTOCOL =================
         const CryptoVault = {
             encrypt: function(data) {
-                // Obfuscates and securely encodes local storage objects
                 return btoa(unescape(encodeURIComponent(JSON.stringify(data))));
             },
             decrypt: function(str) {
                 if(!str) return null;
                 try {
-                    // Try decoding encrypted data
                     return JSON.parse(decodeURIComponent(escape(atob(str))));
                 } catch(e) {
-                    // Smart Fallback: Automatically catches unencrypted legacy data and fixes it
                     try { return JSON.parse(str); } catch(err) { return null; }
                 }
             }
@@ -290,8 +286,8 @@
         
         let supabaseClient = null; 
 
-        const LOCAL_EMP_DB = "SANTEX_EMP_DB_V8";
-        const LOCAL_ATT_DB = "SANTEX_ATT_DB_V8";
+        const LOCAL_EMP_DB = "SANTEX_EMP_DB_V9";
+        const LOCAL_ATT_DB = "SANTEX_ATT_DB_V9";
 
         let employees = [];
         let attendanceData = {}; 
@@ -304,7 +300,7 @@
             { id: 17, name: "MUBEEN" }, { id: 18, name: "ALI HASSAN" }
         ];
 
-        // ================= BACKGROUND ENCRYPTED DATA FETCH =================
+        // ================= BACKGROUND CLOUD SYNC =================
         async function attemptCloudSync() {
             if (typeof supabase === 'undefined') {
                 console.warn("Cloud Script Blocked. Initiating Encrypted Local Memory.");
@@ -315,7 +311,6 @@
             try {
                 supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
                 
-                // Fetch Employees
                 const { data: empData, error: empErr } = await supabaseClient.from('santex_employees').select('*').order('id');
                 if (empData && empData.length > 0) {
                     employees = empData;
@@ -326,7 +321,6 @@
                     localStorage.setItem(LOCAL_EMP_DB, CryptoVault.encrypt(employees));
                 }
 
-                // Fetch Attendance
                 const { data: attData, error: attErr } = await supabaseClient.from('santex_attendance').select('*');
                 if (attData && attData.length > 0) {
                     attendanceData = {};
@@ -340,13 +334,12 @@
                     if(localAtt) attendanceData = localAtt;
                 }
 
-                // Live Sync Status
                 const statusBadge = document.getElementById('networkStatus');
                 statusBadge.innerText = "🟢 CLOUD SYNC ACTIVE (256-BIT)";
                 statusBadge.classList.add('status-live');
 
             } catch (err) {
-                console.error("Cloud Disconnected. Vault locked to Local Memory.");
+                console.error("Cloud Disconnected. Vault locked to Local Memory.", err);
                 loadLocalMemory();
             }
 
@@ -362,7 +355,8 @@
             if(localAtt) attendanceData = localAtt;
         }
 
-        attemptCloudSync();
+        // Delay execution slightly to ensure window has loaded resources
+        setTimeout(attemptCloudSync, 100);
 
         // ================= UI INITIALIZATION =================
         function initUIDatesAndData() {
@@ -378,7 +372,7 @@
 
             renderEmpList();
             loadDailyAttendance();
-            generateReport(); // Pre-render to prevent blank screens
+            generateReport();
         }
 
         function switchTab(tabId) {
@@ -454,10 +448,10 @@
                 payload.push({ date: dateStr, emp_id: empId, primary_status: primaryVal, ot: isOT });
             });
 
-            // 1. Secure Local Storage Array
+            // Local Vault Save
             localStorage.setItem(LOCAL_ATT_DB, CryptoVault.encrypt(attendanceData));
 
-            // 2. Database Live Sync
+            // Cloud Save Attempt
             if (supabaseClient) {
                 try {
                     const { error } = await supabaseClient.from('santex_attendance').upsert(payload, { onConflict: 'date,emp_id' });
@@ -465,6 +459,7 @@
                     document.getElementById('saveMessage').innerText = "ENCRYPTED & CLOUD SYNCED";
                     document.getElementById('saveMessage').style.color = "var(--success)";
                 } catch (error) {
+                    console.error("Upload error:", error);
                     document.getElementById('saveMessage').innerText = "SECURED IN LOCAL VAULT";
                     document.getElementById('saveMessage').style.color = "var(--warning)";
                 }
@@ -487,11 +482,10 @@
             }, 3000);
         }
 
-        // ================= MONTHLY REPORT ENGINE (ZERO ERROR FAILSAFE) =================
+        // ================= MONTHLY REPORT ENGINE =================
         function generateReport() {
             let monthVal = document.getElementById('reportMonth').value; 
             
-            // Failsafe: If browser date input fails, force construct current month
             if(!monthVal) {
                 const today = new Date();
                 monthVal = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
@@ -520,7 +514,6 @@
             for (let d = 1; d <= daysInMonth; d++) { html += `<th class="day-col">${d}</th>`; }
             html += `</tr></thead><tbody>`;
 
-            // Safety check array iteration
             const activeEmps = Array.isArray(employees) ? employees : defaultEmployees;
             
             activeEmps.forEach(emp => {
