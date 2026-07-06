@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SANTEX NUR ENTERPRISES - CLOUD VIP SYSTEM V4</title>
+    <!-- SUPABASE CLIENT -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        /* ================= VIP GLASSMORPHISM UI ================= */
+        :root {
+            --primary: #00e6ff;
+            --bg-dark: #0a0f1c;
+            --panel-bg: rgba(10, 20, 40, 0.6);
+            --border: rgba(0, 230, 255, 0.4);
+            --success: #00ff88;
+            --warning: #ffb800;
+            --danger: #ff3366;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
+        body { background: radial-gradient(circle at top, #142038 0%, var(--bg-dark) 100%); color: #fff; min-height: 100vh; padding: 20px; overflow-x: hidden; }
+        
+        /* ================= 15-SECOND BOOT ANIMATION ================= */
+        #bootOverlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: #000; z-index: 10000; display: flex; flex-direction: column; 
+            justify-content: center; align-items: center; transition: opacity 1s ease-out;
+        }
+        .cyber-loader {
+            width: 150px; height: 150px; border: 3px solid transparent; 
+            border-top: 3px solid var(--primary); border-bottom: 3px solid var(--primary);
+            border-radius: 50%; animation: spin 2s linear infinite; position: relative;
+        }
+        .cyber-loader::before {
+            content: ''; position: absolute; top: 10px; left: 10px; right: 10px; bottom: 10px;
+            border: 3px solid transparent; border-left: 3px solid var(--success); border-right: 3px solid var(--success);
+            border-radius: 50%; animation: spin 1.5s linear infinite reverse;
+        }
+        .boot-text { margin-top: 30px; font-family: monospace; font-size: 18px; color: var(--primary); text-shadow: 0 0 10px var(--primary); text-align: center; line-height: 1.5;}
+        .progress-bar-container { width: 300px; height: 4px; background: #222; margin-top: 20px; overflow: hidden; border-radius: 2px; }
+        .progress-bar { height: 100%; width: 0%; background: var(--primary); box-shadow: 0 0 10px var(--primary); animation: loadBar 14s ease-in-out forwards; }
+
+        @keyframes loadBar { 0% { width: 0%; } 20% { width: 15%; } 50% { width: 60%; } 80% { width: 85%; } 100% { width: 100%; } }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* ================= SUCCESS SAVE ANIMATION ================= */
+        #saveOverlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0,0,0,0.85); backdrop-filter: blur(10px);
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            z-index: 9999; opacity: 0; pointer-events: none; transition: opacity 0.3s;
+        }
+        .success-ring {
+            width: 100px; height: 100px; border: 4px solid var(--success); border-radius: 50%;
+            display: flex; justify-content: center; align-items: center; box-shadow: 0 0 40px rgba(0,255,136,0.4);
+            transform: scale(0);
+        }
+        .success-ring.animate { animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        .success-ring span { font-size: 50px; color: var(--success); }
+        #saveOverlay h2 { color: var(--success); letter-spacing: 4px; margin-top: 20px; font-weight: 900; text-shadow: 0 0 20px var(--success); }
+
+        @keyframes popIn { 0% { transform: scale(0); } 70% { transform: scale(1.1); } 100% { transform: scale(1); } }
+
+        /* ================= MAIN UI ================= */
+        .header { text-align: center; margin-bottom: 25px; }
+        .header h1 { font-size: 34px; letter-spacing: 2px; color: var(--primary); font-weight: 900; text-shadow: 0 0 20px rgba(0,230,255,0.5); }
+        .header p { color: #88c0d0; font-size: 15px; letter-spacing: 2px; margin-top: 5px; text-transform: uppercase; }
+
+        .nav-tabs { display: flex; gap: 10px; margin-bottom: 25px; justify-content: center; }
+        .nav-btn {
+            background: rgba(0,230,255,0.05); color: #fff; border: 1px solid var(--border); padding: 12px 30px;
+            border-radius: 6px; cursor: pointer; text-transform: uppercase; font-weight: 800; transition: all 0.3s;
+        }
+        .nav-btn:hover, .nav-btn.active { background: var(--primary); color: #000; box-shadow: 0 0 25px rgba(0,230,255,0.6); }
+
+        .tab-content { display: none; background: var(--panel-bg); backdrop-filter: blur(15px); border: 1px solid var(--border); border-radius: 12px; padding: 25px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); animation: fadeUp 0.4s ease; }
+        .tab-content.active { display: block; }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Controls */
+        .control-group { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; }
+        input[type="date"], input[type="month"], input[type="text"] {
+            background: rgba(0, 0, 0, 0.8); color: var(--primary); border: 1px solid var(--border);
+            padding: 12px 15px; border-radius: 6px; outline: none; font-weight: bold; font-size: 16px;
+        }
+        input[type="date"]::-webkit-calendar-picker-indicator, input[type="month"]::-webkit-calendar-picker-indicator { filter: invert(1) sepia(100%) saturate(500%) hue-rotate(130deg); cursor: pointer; }
+        
+        .action-btn { background: var(--primary); color: #000; border: none; padding: 12px 30px; border-radius: 6px; font-weight: 900; cursor: pointer; text-transform: uppercase; transition: 0.2s; box-shadow: 0 0 15px rgba(0,230,255,0.4); }
+        .action-btn:hover { box-shadow: 0 0 30px rgba(0,230,255,0.8); transform: translateY(-2px); }
+        
+        /* Tables */
+        .ui-table { width: 100%; border-collapse: collapse; }
+        .ui-table th, .ui-table td { border: 1px solid rgba(255,255,255,0.1); padding: 12px; text-align: left; }
+        .ui-table th { background: rgba(0, 230, 255, 0.1); color: var(--primary); font-size: 15px; text-transform: uppercase; letter-spacing: 1px; }
+        .ui-table td { font-size: 16px; font-weight: bold; }
+        
+        /* Interactive Multi-Select Statuses */
+        .status-group { display: flex; align-items: center; gap: 20px; }
+        .radio-primary { display: flex; gap: 15px; border-right: 2px solid rgba(255,255,255,0.2); padding-right: 20px; }
+        .check-addon { padding-left: 5px; }
+        
+        .status-label { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; font-size: 15px; transition: 0.2s; }
+        .status-label:hover { text-shadow: 0 0 8px currentColor; }
+        .status-label input { width: 18px; height: 18px; cursor: pointer; accent-color: currentColor; }
+
+        /* ================= PERFECT PRINT FORMATTING (Image replication) ================= */
+        @page { size: A4 landscape; margin: 0; }
+        @media print {
+            body { background: #fff; color: #000; padding: 10mm; }
+            .no-print, #bootOverlay, #saveOverlay { display: none !important; }
+            #print-section { display: block !important; width: 100%; }
+            
+            .print-header-top { text-align: center; font-weight: 900; font-size: 18px; font-family: 'Arial Black', Impact, sans-serif; text-transform: uppercase; color: #000; margin-bottom: 5px; }
+            .print-header-sub { text-align: center; font-weight: 900; font-size: 16px; font-family: 'Arial Black', Impact, sans-serif; text-transform: uppercase; color: #000; margin-bottom: 20px; }
+            
+            .print-table { width: 100%; border-collapse: collapse; font-family: 'Arial', sans-serif; border: 3px solid #000; table-layout: fixed; }
+            .print-table th, .print-table td { border: 1px solid #000; text-align: center; vertical-align: middle; height: 26px; font-weight: 900; font-size: 11px; color: #000; }
+            .print-table th.emp-name, .print-table td.emp-name { width: 160px; text-align: left; padding-left: 6px; white-space: nowrap; overflow: hidden; font-size: 12px; text-transform: uppercase; }
+            .print-table th.remark-col { width: 70px; }
+            .print-table .day-col { width: 22px; }
+            
+            .day-row { font-size: 9px; font-weight: 900; background-color: #f0f0f0 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; border-bottom: 2px solid #000; }
+            .date-row { background-color: #e0e0e0 !important; font-size: 11px; font-weight: 900; -webkit-print-color-adjust: exact; print-color-adjust: exact; border-bottom: 2px solid #000; }
+            .has-ot { background-color: #f8f9fa !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 15-SECOND VIP BOOT SEQUENCE -->
+    <div id="bootOverlay">
+        <div class="cyber-loader"></div>
+        <div class="boot-text" id="bootText">INITIATING CLOUD UPLINK...</div>
+        <div class="progress-bar-container"><div class="progress-bar"></div></div>
+    </div>
+
+    <!-- SUCCESS ANIMATION -->
+    <div id="saveOverlay">
+        <div class="success-ring" id="sRing"><span>✔</span></div>
+        <h2 id="saveMessage">CLOUD SYNC COMPLETE</h2>
+    </div>
+
+    <!-- MAIN INTERFACE -->
+    <div class="header no-print">
+        <h1>SANTEX NUR ENTERPRISES</h1>
+        <p>CLOUD ATTENDANCE VAULT V4 - LIVE DEPLOYMENT</p>
+    </div>
+
+    <div class="nav-tabs no-print">
+        <button class="nav-btn active" onclick="switchTab('dailyEntry')">Daily Tracker</button>
+        <button class="nav-btn" onclick="switchTab('monthlyReport')">Vault & Print Engine</button>
+        <button class="nav-btn" onclick="switchTab('manageEmp')">Employee Registry</button>
+    </div>
+
+    <!-- DAILY ENTRY TAB -->
+    <div id="dailyEntry" class="tab-content active no-print">
+        <div class="control-group">
+            <h2 style="color: var(--primary); flex-grow: 1;">MARK / EDIT ATTENDANCE</h2>
+            <label style="font-weight: bold; font-size: 16px;">TARGET DATE: </label>
+            <input type="date" id="entryDate" onchange="loadDailyAttendance()">
+            <span id="editModeIndicator" style="color: var(--warning); font-weight: bold; display: none; background: rgba(255,184,0,0.2); padding: 5px 10px; border-radius: 4px;">EDITING EXISTING RECORD</span>
+        </div>
+        
+        <table class="ui-table">
+            <thead>
+                <tr>
+                    <th style="width: 250px;">Employee Name</th>
+                    <th>Attendance Status (Primary + Addons)</th>
+                </tr>
+            </thead>
+            <tbody id="dailyEntryBody">
+                <!-- Auto Generated -->
+            </tbody>
+        </table>
+        <button class="action-btn" style="width: 100%; margin-top: 25px; font-size: 20px; padding: 15px;" onclick="saveDailyAttendance()">ENCRYPT & SYNC TO CLOUD</button>
+    </div>
+
+    <!-- MONTHLY REPORT & PRINT TAB -->
+    <div id="monthlyReport" class="tab-content no-print">
+        <div class="control-group">
+            <h2 style="color: var(--primary); flex-grow: 1;">MONTHLY REPORT ENGINE</h2>
+            <label style="font-weight: bold;">SELECT MONTH: </label>
+            <input type="month" id="reportMonth" onchange="generateReport()">
+            <button class="action-btn" onclick="window.print()" style="background: transparent; border: 2px solid var(--primary); color: var(--primary);">PRINT HD FORMAT</button>
+        </div>
+        
+        <div style="overflow-x: auto; background: #fff; padding: 10px; border-radius: 5px;" id="reportPreviewContainer">
+            <!-- Preview renders here -->
+        </div>
+    </div>
+
+    <!-- MANAGE EMPLOYEES TAB -->
+    <div id="manageEmp" class="tab-content no-print">
+        <div class="control-group">
+            <h2 style="color: var(--primary); flex-grow: 1;">EMPLOYEE DATABASE</h2>
+            <input type="text" id="newEmpName" placeholder="ENTER NEW EMPLOYEE..." style="width: 300px;">
+            <button class="action-btn" onclick="addEmployee()">ADD RECORD</button>
+        </div>
+        
+        <table class="ui-table">
+            <thead>
+                <tr>
+                    <th style="width: 80px;">ID</th>
+                    <th>Employee Name</th>
+                    <th style="width: 200px; text-align: center;">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="empListBody">
+                <!-- Auto Generated -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- HIDDEN PRINT SECTION -->
+    <div id="print-section" style="display: none;"></div>
+
+    <script>
+        // ================= SUPABASE INITIALIZATION =================
+        const SUPABASE_URL = 'https://xxfzgzubidfczvzfwiob.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh4ZnpnenViaWRmY3p2emZ3aW9iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzMzAzNzYsImV4cCI6MjA5ODkwNjM3Nn0.k73I4t76m6QQrVZbCxkj22nKUpFBdTWAFRaH7kLAGm8';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        let employees = [];
+        let attendanceData = {}; // Internal Matrix: { "YYYY-MM-DD": { empId: {primary, ot} } }
+
+        // ================= 15-SECOND CLOUD BOOT SEQUENCE =================
+        const bootTexts = [
+            "INITIATING CLOUD UPLINK...",
+            "AUTHENTICATING VIP CREDENTIALS...",
+            "ESTABLISHING SUPABASE CONNECTION...",
+            "FETCHING LIVE EMPLOYEE REGISTRY...",
+            "DOWNLOADING ENCRYPTED ATTENDANCE VAULT...",
+            "VERIFYING DATA INTEGRITY...",
+            "BUILDING MULTI-SELECTION MATRICES...",
+            "SYSTEM READY. WELCOME VIP."
+        ];
+
+        window.onload = function() {
+            let textIndex = 0;
+            const textElement = document.getElementById('bootText');
+            
+            const textInterval = setInterval(() => {
+                textIndex++;
+                if(textIndex < bootTexts.length) textElement.innerText = bootTexts[textIndex];
+            }, 1800);
+
+            // Fetch data concurrently while animation plays
+            fetchCloudData();
+
+            // Strict 15-second visual requirement
+            setTimeout(() => {
+                clearInterval(textInterval);
+                document.getElementById('bootOverlay').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('bootOverlay').style.display = 'none';
+                    initUI();
+                }, 1000);
+            }, 15000); 
+        };
+
+        // ================= DATABASE FETCHING =================
+        async function fetchCloudData() {
+            try {
+                // Fetch Employees
+                const { data: empData, error: empErr } = await supabase.from('santex_employees').select('*').order('id');
+                if (empData) employees = empData;
+
+                // Fetch Attendance
+                const { data: attData, error: attErr } = await supabase.from('santex_attendance').select('*');
+                if (attData) {
+                    attendanceData = {};
+                    attData.forEach(row => {
+                        if (!attendanceData[row.date]) attendanceData[row.date] = {};
+                        attendanceData[row.date][row.emp_id] = {
+                            primary: row.primary_status,
+                            ot: row.ot
+                        };
+                    });
+                }
+            } catch (err) {
+                console.error("Cloud Sync Error during boot", err);
+            }
+        }
+
+        function initUI() {
+            const today = new Date();
+            const yyyy = today.getFullYear();
+            const mm = String(today.getMonth() + 1).padStart(2, '0');
+            const dd = String(today.getDate()).padStart(2, '0');
+            
+            document.getElementById('entryDate').value = `${yyyy}-${mm}-${dd}`;
+            document.getElementById('reportMonth').value = `${yyyy}-${mm}`;
+
+            renderEmpList();
+            loadDailyAttendance();
+        }
+
+        // ================= UI ROUTING =================
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            event.target.classList.add('active');
+            
+            if(tabId === 'dailyEntry') loadDailyAttendance();
+            if(tabId === 'monthlyReport') generateReport(); 
+        }
+
+        // ================= DAILY ENTRY (CLOUD READ/WRITE) =================
+        function loadDailyAttendance() {
+            const dateStr = document.getElementById('entryDate').value;
+            if(!dateStr) return;
+            
+            const tbody = document.getElementById('dailyEntryBody');
+            tbody.innerHTML = "";
+            
+            const isSunday = new Date(dateStr).getDay() === 0;
+            const dayData = attendanceData[dateStr];
+            
+            document.getElementById('editModeIndicator').style.display = dayData ? 'inline-block' : 'none';
+
+            employees.forEach(emp => {
+                let primary = isSunday ? "H" : "P";
+                let hasOT = false;
+
+                if (dayData && dayData[emp.id]) {
+                    primary = dayData[emp.id].primary || primary;
+                    hasOT = dayData[emp.id].ot || false;
+                }
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td style="color: #fff; font-size: 18px;">${emp.name}</td>
+                        <td class="status-group" data-empid="${emp.id}">
+                            <div class="radio-primary">
+                                <label class="status-label" style="color: #4cd137;"><input type="radio" name="pri_${emp.id}" value="P" ${primary === 'P' ? 'checked' : ''}> P</label>
+                                <label class="status-label" style="color: #e84118;"><input type="radio" name="pri_${emp.id}" value="A" ${primary === 'A' ? 'checked' : ''}> A</label>
+                                <label class="status-label" style="color: #fbc531;"><input type="radio" name="pri_${emp.id}" value="L" ${primary === 'L' ? 'checked' : ''}> L</label>
+                                <label class="status-label" style="color: #00a8ff;"><input type="radio" name="pri_${emp.id}" value="HL" ${primary === 'HL' ? 'checked' : ''}> HL</label>
+                                <label class="status-label" style="color: var(--primary);"><input type="radio" name="pri_${emp.id}" value="H" ${primary === 'H' ? 'checked' : ''}> H</label>
+                            </div>
+                            <div class="check-addon">
+                                <label class="status-label" style="color: #ff9f43; font-weight: 900;"><input type="checkbox" class="ot-check" ${hasOT ? 'checked' : ''}> + OVERTIME (OT)</label>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        async function saveDailyAttendance() {
+            const dateStr = document.getElementById('entryDate').value;
+            if(!dateStr) return;
+
+            // Show intermediate loading state
+            document.getElementById('saveMessage').innerText = "UPLOADING TO SUPABASE...";
+            const overlay = document.getElementById('saveOverlay');
+            overlay.style.opacity = '1';
+            overlay.style.pointerEvents = 'all';
+
+            const payload = [];
+            
+            if(!attendanceData[dateStr]) attendanceData[dateStr] = {};
+
+            document.querySelectorAll('.status-group').forEach(group => {
+                const empId = parseInt(group.dataset.empid);
+                const primaryVal = group.querySelector(`input[name="pri_${empId}"]:checked`).value;
+                const isOT = group.querySelector('.ot-check').checked;
+                
+                // Update Local Matrix
+                attendanceData[dateStr][empId] = { primary: primaryVal, ot: isOT };
+
+                // Push to DB payload
+                payload.push({
+                    date: dateStr,
+                    emp_id: empId,
+                    primary_status: primaryVal,
+                    ot: isOT
+                });
+            });
+
+            // Upsert array to Supabase
+            const { error } = await supabase.from('santex_attendance').upsert(payload, { onConflict: 'date,emp_id' });
+
+            if (error) {
+                document.getElementById('saveMessage').innerText = "ERROR SYNCING DATA!";
+                document.getElementById('saveMessage').style.color = "var(--danger)";
+                setTimeout(() => { overlay.style.opacity = '0'; overlay.style.pointerEvents = 'none'; }, 3000);
+                return;
+            }
+
+            // Success Animation
+            document.getElementById('saveMessage').innerText = "CLOUD SYNC COMPLETE";
+            document.getElementById('saveMessage').style.color = "var(--success)";
+            const ring = document.getElementById('sRing');
+            ring.classList.remove('animate');
+            void ring.offsetWidth; 
+            ring.classList.add('animate');
+            
+            loadDailyAttendance(); 
+            generateReport(); 
+
+            setTimeout(() => {
+                overlay.style.opacity = '0';
+                overlay.style.pointerEvents = 'none';
+            }, 3000);
+        }
+
+        // ================= MONTHLY REPORT ENGINE =================
+        function generateReport() {
+            const monthVal = document.getElementById('reportMonth').value; 
+            if(!monthVal) return;
+
+            const [year, month] = monthVal.split('-');
+            const daysInMonth = new Date(year, month, 0).getDate();
+            const monthName = new Date(year, month - 1).toLocaleString('default', { month: 'short' }).toUpperCase();
+
+            let html = `
+                <div class="print-header-top">SANTEX NUR ENTERPRISES SALES TEAM ATTENDANCE</div>
+                <div class="print-header-sub">MONTH: ${monthName}-${year.slice(-2)}</div>
+                <table class="print-table">
+                    <thead>
+                        <tr class="day-row">
+                            <th rowspan="2" class="emp-name">EMPLOYEE NAME</th>
+            `;
+
+            for (let d = 1; d <= daysInMonth; d++) {
+                const dayName = new Date(year, month - 1, d).toLocaleString('default', { weekday: 'short' }).charAt(0) + new Date(year, month - 1, d).toLocaleString('default', { weekday: 'short' }).slice(1,3).toLowerCase();
+                html += `<th class="day-col">${dayName}</th>`;
+            }
+            html += `<th rowspan="2" class="remark-col">REMARKS</th></tr><tr class="date-row">`;
+            
+            for (let d = 1; d <= daysInMonth; d++) { html += `<th class="day-col">${d}</th>`; }
+            html += `</tr></thead><tbody>`;
+
+            employees.forEach(emp => {
+                html += `<tr><td class="emp-name">${emp.name}</td>`;
+                for (let d = 1; d <= daysInMonth; d++) {
+                    const dateStr = `${year}-${month}-${String(d).padStart(2, '0')}`;
+                    const record = attendanceData[dateStr]?.[emp.id];
+                    
+                    let displayVal = "";
+                    let isOT = false;
+
+                    if (record) {
+                        displayVal = record.primary; 
+                        if (record.ot) {
+                            displayVal += "<br>+OT"; 
+                            isOT = true;
+                        }
+                    }
+
+                    const otClass = isOT ? 'has-ot' : '';
+                    html += `<td class="${otClass}" style="line-height: 1;">${displayVal}</td>`;
+                }
+                html += `<td></td></tr>`; 
+            });
+
+            html += `</tbody></table>`;
+
+            document.getElementById('reportPreviewContainer').innerHTML = html;
+            document.getElementById('print-section').innerHTML = html;
+        }
+
+        // ================= EMPLOYEES CLOUD CRUD =================
+        function renderEmpList() {
+            const tbody = document.getElementById('empListBody');
+            tbody.innerHTML = "";
+            employees.forEach(emp => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${emp.id}</td>
+                        <td style="font-size: 18px; color: var(--primary);">${emp.name}</td>
+                        <td style="text-align: center;">
+                            <button style="background: var(--warning); color: #000; border: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; margin-right: 5px;" onclick="editEmp(${emp.id})">EDIT</button>
+                            <button style="background: var(--danger); color: #fff; border: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer;" onclick="deleteEmp(${emp.id})">DEL</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+        
+        async function addEmployee() {
+            const nameInput = document.getElementById('newEmpName');
+            const name = nameInput.value.trim().toUpperCase();
+            if (!name) return;
+            const newId = employees.length > 0 ? Math.max(...employees.map(e => e.id)) + 1 : 1;
+            
+            // Local Update
+            employees.push({ id: newId, name: name });
+            renderEmpList(); loadDailyAttendance(); generateReport();
+            nameInput.value = "";
+
+            // Cloud Sync
+            await supabase.from('santex_employees').insert([{ id: newId, name: name }]);
+        }
+
+        async function editEmp(id) {
+            const emp = employees.find(e => e.id === id);
+            const newName = prompt("RENAME EMPLOYEE:", emp.name);
+            if(newName && newName.trim() !== "") {
+                const finalName = newName.trim().toUpperCase();
+                // Local
+                emp.name = finalName;
+                renderEmpList(); loadDailyAttendance(); generateReport();
+                // Cloud
+                await supabase.from('santex_employees').update({ name: finalName }).eq('id', id);
+            }
+        }
+
+        async function deleteEmp(id) {
+            if(confirm("DELETE FROM CURRENT ROSTER? Vault history tied to this ID will be affected.")) {
+                // Local
+                employees = employees.filter(e => e.id !== id);
+                renderEmpList(); loadDailyAttendance(); generateReport();
+                // Cloud
+                await supabase.from('santex_employees').delete().eq('id', id);
+            }
+        }
+    </script>
+</body>
+</html>
