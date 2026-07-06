@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SANTEX NUR ENTERPRISES - CLOUD VIP SYSTEM V5</title>
+    <title>SANTEX NUR ENTERPRISES - CLOUD VIP SYSTEM V6</title>
     <!-- SUPABASE CLIENT -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
@@ -20,27 +20,29 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
         body { background: radial-gradient(circle at top, #142038 0%, var(--bg-dark) 100%); color: #fff; min-height: 100vh; padding: 20px; overflow-x: hidden; }
         
-        /* ================= 15-SECOND BOOT ANIMATION ================= */
+        /* ================= 10-SECOND BOOT ANIMATION ================= */
         #bootOverlay {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background: #000; z-index: 10000; display: flex; flex-direction: column; 
-            justify-content: center; align-items: center; transition: opacity 1s ease-out;
+            justify-content: center; align-items: center; transition: opacity 0.8s ease-out;
         }
         .cyber-loader {
             width: 150px; height: 150px; border: 3px solid transparent; 
             border-top: 3px solid var(--primary); border-bottom: 3px solid var(--primary);
-            border-radius: 50%; animation: spin 2s linear infinite; position: relative;
+            border-radius: 50%; animation: spin 1.5s linear infinite; position: relative;
         }
         .cyber-loader::before {
-            content: ''; position: absolute; top: 10px; left: 10px; right: 10px; bottom: 10px;
+            content: ''; position: absolute; top: 12px; left: 12px; right: 12px; bottom: 12px;
             border: 3px solid transparent; border-left: 3px solid var(--success); border-right: 3px solid var(--success);
-            border-radius: 50%; animation: spin 1.5s linear infinite reverse;
+            border-radius: 50%; animation: spin 1s linear infinite reverse;
         }
-        .boot-text { margin-top: 30px; font-family: monospace; font-size: 18px; color: var(--primary); text-shadow: 0 0 10px var(--primary); text-align: center; line-height: 1.5;}
-        .progress-bar-container { width: 300px; height: 4px; background: #222; margin-top: 20px; overflow: hidden; border-radius: 2px; }
-        .progress-bar { height: 100%; width: 0%; background: var(--primary); box-shadow: 0 0 10px var(--primary); animation: loadBar 14s ease-in-out forwards; }
+        .boot-text { margin-top: 30px; font-family: monospace; font-size: 18px; color: var(--primary); text-shadow: 0 0 10px var(--primary); text-align: center; line-height: 1.5; font-weight: bold;}
+        .progress-bar-container { width: 320px; height: 4px; background: #222; margin-top: 25px; overflow: hidden; border-radius: 2px; }
+        
+        /* Perfectly timed 9.5 second progress bar for a 10s boot */
+        .progress-bar { height: 100%; width: 0%; background: var(--primary); box-shadow: 0 0 12px var(--primary); animation: loadBar 9.5s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
 
-        @keyframes loadBar { 0% { width: 0%; } 20% { width: 15%; } 50% { width: 60%; } 80% { width: 85%; } 100% { width: 100%; } }
+        @keyframes loadBar { 0% { width: 0%; } 15% { width: 20%; } 45% { width: 55%; } 75% { width: 85%; } 100% { width: 100%; } }
         @keyframes spin { 100% { transform: rotate(360deg); } }
 
         /* ================= SUCCESS SAVE ANIMATION ================= */
@@ -55,9 +57,9 @@
             display: flex; justify-content: center; align-items: center; box-shadow: 0 0 40px rgba(0,255,136,0.4);
             transform: scale(0);
         }
-        .success-ring.animate { animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        .success-ring.animate { animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
         .success-ring span { font-size: 50px; color: var(--success); }
-        #saveOverlay h2 { color: var(--success); letter-spacing: 4px; margin-top: 20px; font-weight: 900; text-shadow: 0 0 20px var(--success); }
+        #saveOverlay h2 { color: var(--success); letter-spacing: 4px; margin-top: 20px; font-weight: 900; text-shadow: 0 0 20px var(--success); text-align: center; }
 
         @keyframes popIn { 0% { transform: scale(0); } 70% { transform: scale(1.1); } 100% { transform: scale(1); } }
 
@@ -65,7 +67,7 @@
         .header { text-align: center; margin-bottom: 25px; }
         .header h1 { font-size: 34px; letter-spacing: 2px; color: var(--primary); font-weight: 900; text-shadow: 0 0 20px rgba(0,230,255,0.5); margin-bottom: 5px; }
         .header p { color: #88c0d0; font-size: 14px; letter-spacing: 2px; text-transform: uppercase; font-weight: bold; }
-        .supervisor-badge { background: rgba(0,230,255,0.1); border: 1px solid var(--primary); padding: 4px 10px; border-radius: 4px; color: var(--primary); font-size: 12px; display: inline-block; margin-top: 8px; letter-spacing: 1px; }
+        .supervisor-badge { background: rgba(0,230,255,0.1); border: 1px solid var(--primary); padding: 5px 12px; border-radius: 4px; color: var(--primary); font-size: 12px; display: inline-block; margin-top: 10px; letter-spacing: 1px; font-weight: bold; box-shadow: 0 0 10px rgba(0,230,255,0.2); }
 
         .nav-tabs { display: flex; gap: 10px; margin-bottom: 25px; justify-content: center; }
         .nav-btn {
@@ -128,7 +130,7 @@
 </head>
 <body>
 
-    <!-- 15-SECOND VIP BOOT SEQUENCE -->
+    <!-- 10-SECOND VIP BOOT SEQUENCE -->
     <div id="bootOverlay">
         <div class="cyber-loader"></div>
         <div class="boot-text" id="bootText">INITIATING CLOUD UPLINK...</div>
@@ -144,7 +146,7 @@
     <!-- MAIN INTERFACE -->
     <div class="header no-print">
         <h1>SANTEX NUR ENTERPRISES</h1>
-        <p>CLOUD ATTENDANCE VAULT V5 - LIVE DEPLOYMENT</p>
+        <p>CLOUD ATTENDANCE VAULT V6 - LIVE DEPLOYMENT</p>
         <div class="supervisor-badge">AUTHORIZED BY I.T. SUPERVISOR DILAWAR ALI</div>
     </div>
 
@@ -174,7 +176,7 @@
                 <!-- Auto Generated -->
             </tbody>
         </table>
-        <button class="action-btn" style="width: 100%; margin-top: 25px; font-size: 20px; padding: 15px;" onclick="saveDailyAttendance()">ENCRYPT & SYNC TO CLOUD</button>
+        <button class="action-btn" style="width: 100%; margin-top: 25px; font-size: 20px; padding: 15px;" onclick="saveDailyAttendance()">ENCRYPT & SYNC RECORD</button>
     </div>
 
     <!-- MONTHLY REPORT & PRINT TAB -->
@@ -217,13 +219,15 @@
     <div id="print-section" style="display: none;"></div>
 
     <script>
-        // ================= SUPABASE & HYBRID STORAGE INITIALIZATION =================
+        // ================= CONFIG & GLOBALS =================
         const SUPABASE_URL = 'https://xxfzgzubidfczvzfwiob.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh4ZnpnenViaWRmY3p2emZ3aW9iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzMzAzNzYsImV4cCI6MjA5ODkwNjM3Nn0.k73I4t76m6QQrVZbCxkj22nKUpFBdTWAFRaH7kLAGm8';
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        
+        let supabase = null; // Defined dynamically to prevent crash if CDN is slow
+        let uiInitialized = false;
 
-        const LOCAL_EMP_DB = "SANTEX_EMP_DB_V5";
-        const LOCAL_ATT_DB = "SANTEX_ATT_DB_V5";
+        const LOCAL_EMP_DB = "SANTEX_EMP_DB_V6";
+        const LOCAL_ATT_DB = "SANTEX_ATT_DB_V6";
 
         let employees = [];
         let attendanceData = {}; 
@@ -236,59 +240,68 @@
             { id: 17, name: "MUBEEN" }, { id: 18, name: "ALI HASSAN" }
         ];
 
-        // ================= 15-SECOND CLOUD BOOT SEQUENCE =================
-        const bootTexts = [
-            "INITIATING CLOUD UPLINK...",
-            "AUTHENTICATING I.T. SUPERVISOR CREDENTIALS...",
-            "ESTABLISHING HYBRID SUPABASE CONNECTION...",
-            "FETCHING LIVE DATA MATRIX...",
-            "VERIFYING CLOUD INTEGRITY...",
-            "AUTO-SEEDING MISSING ARCHIVES (ZERO ERROR PROTOCOL)...",
-            "BUILDING MULTI-SELECTION UI...",
-            "SYSTEM READY. WELCOME DILAWAR ALI."
-        ];
-
-        window.onload = function() {
+        // ================= SAFE INIT & BOOT SEQUENCE =================
+        window.addEventListener('load', () => {
+            // 1. Text Animation Cycle (7 texts over 10 seconds = ~1400ms each)
+            const bootTexts = [
+                "INITIATING CLOUD UPLINK...",
+                "AUTHENTICATING VIP CREDENTIALS...",
+                "ESTABLISHING HYBRID CONNECTION...",
+                "FETCHING LIVE DATA MATRIX...",
+                "VERIFYING INTEGRITY...",
+                "AUTO-SEEDING ARCHIVES...",
+                "SYSTEM READY. WELCOME VIP."
+            ];
             let textIndex = 0;
             const textElement = document.getElementById('bootText');
             
             const textInterval = setInterval(() => {
                 textIndex++;
                 if(textIndex < bootTexts.length) textElement.innerText = bootTexts[textIndex];
-            }, 1800);
+            }, 1400);
 
-            // Execute Hybrid Fetch
-            fetchCloudData();
-
-            // Strict 15-second cinematic boot
+            // 2. STRICT 10-SECOND UNBLOCKER (GUARANTEED UI REVEAL)
             setTimeout(() => {
                 clearInterval(textInterval);
-                document.getElementById('bootOverlay').style.opacity = '0';
-                setTimeout(() => {
-                    document.getElementById('bootOverlay').style.display = 'none';
-                    initUI();
-                }, 1000);
-            }, 15000); 
-        };
+                const overlay = document.getElementById('bootOverlay');
+                if (overlay) {
+                    overlay.style.opacity = '0';
+                    setTimeout(() => { 
+                        overlay.style.display = 'none'; 
+                        if (!uiInitialized) initUI(); // Ensure UI initializes even if fetch failed entirely
+                    }, 800);
+                }
+            }, 10000); 
 
-        // ================= ZERO ERROR HYBRID FETCHING =================
+            // 3. Try Safe Cloud Connection
+            try {
+                if (window.supabase) {
+                    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+                    fetchCloudData(); // Attempt hybrid sync
+                } else {
+                    console.warn("Supabase SDK blocked by browser. Using Local Fallback.");
+                    fallbackToLocal();
+                }
+            } catch (err) {
+                console.error("Initialization Crash Prevented:", err);
+                fallbackToLocal();
+            }
+        });
+
+        // ================= ZERO ERROR FETCH ENGINE =================
         async function fetchCloudData() {
             try {
-                // 1. Fetch Employees
                 const { data: empData, error: empErr } = await supabase.from('santex_employees').select('*').order('id');
                 
                 if (empData && empData.length > 0) {
                     employees = empData;
-                    localStorage.setItem(LOCAL_EMP_DB, JSON.stringify(employees)); // Backup locally
+                    localStorage.setItem(LOCAL_EMP_DB, JSON.stringify(employees)); 
                 } else {
-                    // ZERO ERROR: If cloud is empty or RLS blocks it, load defaults & force auto-seed
-                    console.log("Cloud Empty. Activating Auto-Seed...");
                     employees = [...defaultEmployees];
-                    await supabase.from('santex_employees').upsert(defaultEmployees); // Inject into cloud silently
+                    await supabase.from('santex_employees').upsert(defaultEmployees); 
                     localStorage.setItem(LOCAL_EMP_DB, JSON.stringify(employees));
                 }
 
-                // 2. Fetch Attendance
                 const { data: attData, error: attErr } = await supabase.from('santex_attendance').select('*');
                 
                 if (attData && attData.length > 0) {
@@ -297,22 +310,31 @@
                         if (!attendanceData[row.date]) attendanceData[row.date] = {};
                         attendanceData[row.date][row.emp_id] = { primary: row.primary_status, ot: row.ot };
                     });
-                    localStorage.setItem(LOCAL_ATT_DB, JSON.stringify(attendanceData)); // Backup locally
+                    localStorage.setItem(LOCAL_ATT_DB, JSON.stringify(attendanceData));
                 } else {
-                    // Load local backup if cloud is empty
-                    const localAtt = localStorage.getItem(LOCAL_ATT_DB);
-                    if(localAtt) attendanceData = JSON.parse(localAtt);
+                    fallbackLocalAttendance();
                 }
             } catch (err) {
-                console.error("Hybrid Sync Offline. Loading Local Storage.", err);
-                const localEmp = localStorage.getItem(LOCAL_EMP_DB);
-                employees = localEmp ? JSON.parse(localEmp) : [...defaultEmployees];
-                const localAtt = localStorage.getItem(LOCAL_ATT_DB);
-                if(localAtt) attendanceData = JSON.parse(localAtt);
+                console.error("Cloud Offline. Booting Local DB.");
+                fallbackToLocal();
             }
         }
 
+        function fallbackToLocal() {
+            const localEmp = localStorage.getItem(LOCAL_EMP_DB);
+            employees = localEmp ? JSON.parse(localEmp) : [...defaultEmployees];
+            fallbackLocalAttendance();
+        }
+
+        function fallbackLocalAttendance() {
+            const localAtt = localStorage.getItem(LOCAL_ATT_DB);
+            if(localAtt) attendanceData = JSON.parse(localAtt);
+        }
+
         function initUI() {
+            if (uiInitialized) return; // Prevent double firing
+            uiInitialized = true;
+
             const today = new Date();
             const yyyy = today.getFullYear();
             const mm = String(today.getMonth() + 1).padStart(2, '0');
@@ -336,7 +358,7 @@
             if(tabId === 'monthlyReport') generateReport(); 
         }
 
-        // ================= DAILY ENTRY =================
+        // ================= DAILY ENTRY LOGIC =================
         function loadDailyAttendance() {
             const dateStr = document.getElementById('entryDate').value;
             if(!dateStr) return;
@@ -399,19 +421,24 @@
                 payload.push({ date: dateStr, emp_id: empId, primary_status: primaryVal, ot: isOT });
             });
 
-            // 1. Save to Local Storage Immediately (Zero Error Fallback)
+            // Local Fallback Save
             localStorage.setItem(LOCAL_ATT_DB, JSON.stringify(attendanceData));
 
-            // 2. Push to Supabase
-            const { error } = await supabase.from('santex_attendance').upsert(payload, { onConflict: 'date,emp_id' });
-
-            if (error) {
-                console.error(error);
-                document.getElementById('saveMessage').innerText = "SAVED LOCALLY (CLOUD OFFLINE)";
-                document.getElementById('saveMessage').style.color = "var(--warning)";
+            // Cloud Save Attempt
+            if (supabase) {
+                try {
+                    const { error } = await supabase.from('santex_attendance').upsert(payload, { onConflict: 'date,emp_id' });
+                    if (error) throw error;
+                    document.getElementById('saveMessage').innerText = "CLOUD SYNC COMPLETE";
+                    document.getElementById('saveMessage').style.color = "var(--success)";
+                } catch (error) {
+                    console.error("Save Error:", error);
+                    document.getElementById('saveMessage').innerText = "SAVED LOCALLY (CLOUD OFFLINE)";
+                    document.getElementById('saveMessage').style.color = "var(--warning)";
+                }
             } else {
-                document.getElementById('saveMessage').innerText = "CLOUD SYNC COMPLETE";
-                document.getElementById('saveMessage').style.color = "var(--success)";
+                document.getElementById('saveMessage').innerText = "SAVED TO LOCAL STORAGE ONLY";
+                document.getElementById('saveMessage').style.color = "var(--warning)";
             }
 
             const ring = document.getElementById('sRing');
@@ -509,7 +536,7 @@
             renderEmpList(); loadDailyAttendance(); generateReport();
             nameInput.value = "";
 
-            await supabase.from('santex_employees').insert([{ id: newId, name: name }]);
+            if (supabase) await supabase.from('santex_employees').insert([{ id: newId, name: name }]);
         }
 
         async function editEmp(id) {
@@ -520,7 +547,7 @@
                 localStorage.setItem(LOCAL_EMP_DB, JSON.stringify(employees));
                 renderEmpList(); loadDailyAttendance(); generateReport();
                 
-                await supabase.from('santex_employees').update({ name: emp.name }).eq('id', id);
+                if (supabase) await supabase.from('santex_employees').update({ name: emp.name }).eq('id', id);
             }
         }
 
@@ -530,7 +557,7 @@
                 localStorage.setItem(LOCAL_EMP_DB, JSON.stringify(employees));
                 renderEmpList(); loadDailyAttendance(); generateReport();
                 
-                await supabase.from('santex_employees').delete().eq('id', id);
+                if (supabase) await supabase.from('santex_employees').delete().eq('id', id);
             }
         }
     </script>
